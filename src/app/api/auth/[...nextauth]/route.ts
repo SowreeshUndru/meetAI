@@ -2,6 +2,8 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaClient } from "@/generated/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { z } from "zod";
 import bcrypt from "bcryptjs"
 
@@ -20,6 +22,14 @@ const prisma = new PrismaClient();
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
 
       name: 'Credentials',
@@ -29,12 +39,13 @@ const handler = NextAuth({
       },
 
       async authorize(credentials, req) {
-        if (!credentials) throw new Error("Invalid credentials");
+        if (!credentials||!credentials.password||!credentials.email) throw new Error("Invalid credentials");
         const { email, password } = credentials;
         if (!email || !password) throw new Error("Invalid credentials");
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email }
+         
         });
 
         if (!user || !user.password || !user.email) throw new Error("User not found");
@@ -59,6 +70,10 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
+  pages: {
+    signIn: "/auth/signin",
+    // signOut: "/auth/signout",
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -79,7 +94,7 @@ const handler = NextAuth({
 
     },
   },
-  
+
 });
 
 export { handler as GET, handler as POST }
