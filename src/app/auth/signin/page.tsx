@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from 'next/navigation';
 
 export default function SignIn() {
     const router = useRouter();
@@ -13,6 +14,17 @@ export default function SignIn() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const searchParams = useSearchParams();
+    ////////
+    
+    useEffect(() => {
+        if (searchParams.getAll("error").includes("OAuthAccountNotLinked")) {
+            setError("This account is already linked with a different provider. Please sign in with that provider.");
+        }
+    },[]);
+
+    ///////
+    
 
     async function handleSubmit(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
@@ -23,7 +35,7 @@ export default function SignIn() {
             email,
             password,
         });
-
+        console.log("Response:", res);
         if (res?.error) {
             setError(res.error || "Invalid credentials");
         } else {
