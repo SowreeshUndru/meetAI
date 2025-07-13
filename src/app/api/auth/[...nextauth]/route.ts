@@ -75,6 +75,29 @@ const handler = NextAuth({
     // signOut: "/auth/signout",
   },
   callbacks: {
+     async signIn({ user, account }) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        include: { accounts: true },
+      });
+      if(account==null) return true;
+      // If user exists but is linked with a different provider — block sign in
+      if (existingUser) {
+        const isSameProvider = existingUser.accounts.some(
+          (acc) =>
+            acc.provider === account.provider &&
+            acc.providerAccountId === account.providerAccountId
+        );
+
+        if (!isSameProvider) {
+        
+            console.error("OAuthAccountNotLinked: User exists with different provider");
+          throw new Error('OAuthAccountNotLinked');
+        }
+      }
+
+      return true; // Allow sign in
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
