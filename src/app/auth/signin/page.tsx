@@ -119,7 +119,7 @@ export default function SignIn() {
                         </div>
                     </div>
 
-                    <div className="flex justify-center items-center m-2">
+                    <div className=" justify-center items-center m-2 bg-radial from-sidebar-accent tosidebar relative hidden md:flex flex-col">
                         <img
                             src="/logo.png"
                             alt="Meet.io logo featuring stylized text meet.io in bold blue font, centered on a white background. The design conveys a friendly and professional tone."
