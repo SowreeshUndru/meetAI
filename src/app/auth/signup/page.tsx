@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { redirect } from "next/dist/server/api-utils";
 import { Card } from "@/components/ui/card";
+import { sign } from "crypto";
+import { signIn } from "next-auth/react";
 
 export default function Signup() {
     const Router = useRouter();
@@ -93,8 +95,14 @@ export default function Signup() {
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 relative  top-1/4 space-x-2">
-                                <Button className="bg-[#ABC3E4] text-black"><img src="/google_logo.png " alt="" className="md:h-7 md:w-7 h-4 w-4 rounded-full" /> Google</Button>
-                                <Button className="bg-[#4D4D4D]"><img src="/github_logo.png" alt="github_logo" className="md:h-7 md:w-7 h-4 w-4 rounded-full" />Github</Button>
+                                <Button className="bg-[#ABC3E4] text-black" 
+                                 onClick={()=>{
+                                    signIn("google", { callbackUrl: "/"})
+                                }}
+                                ><img src="/google_logo.png " alt="" className="md:h-7 md:w-7 h-4 w-4 rounded-full" /> Google</Button>
+                                <Button className="bg-[#4D4D4D]" onClick={()=>{
+                                    signIn("github", { callbackUrl: "/"})
+                                }} ><img src="/github_logo.png" alt="github_logo" className="md:h-7 md:w-7 h-4 w-4 rounded-full" />Github</Button>
                             </div>
                         </div>
                         
