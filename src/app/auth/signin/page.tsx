@@ -16,15 +16,15 @@ export default function SignIn() {
     const [error, setError] = useState("");
     const searchParams = useSearchParams();
     ////////
-    
+
     useEffect(() => {
         if (searchParams.getAll("error").includes("OAuthAccountNotLinked")) {
             setError("This account is already linked with a different provider. Please sign in with that provider.");
         }
-    },[]);
+    }, []);
 
     ///////
-    
+
 
     async function handleSubmit(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault();
