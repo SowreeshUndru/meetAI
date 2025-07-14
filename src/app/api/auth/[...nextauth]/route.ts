@@ -89,11 +89,7 @@ const handler = NextAuth({
             acc.providerAccountId === account.providerAccountId
         );
 
-        if (!isSameProvider) {
-        
-            console.error("OAuthAccountNotLinked: User exists with different provider");
-          throw new Error('OAuthAccountNotLinked');
-        }
+       
       }
 
       return true; // Allow sign in
