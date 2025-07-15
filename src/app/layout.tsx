@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* ✅ Put Provider here, wrapping children only */}
+        {/* ✅ Pu Provider here, wrapping children only */}
         <TRPCReactProvider>
           {children}
         </TRPCReactProvider>
