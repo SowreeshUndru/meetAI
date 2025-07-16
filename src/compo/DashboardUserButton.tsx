@@ -8,11 +8,13 @@ import { ChevronDownIcon, CreditCard, LogOut, LogOutIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-
+import { useRouter } from 'next/navigation';
 
 
 export default function DashboardUserButton() {
+  const router=useRouter();
   const session = useSession();
+ 
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
@@ -50,7 +52,7 @@ export default function DashboardUserButton() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => { signOut({ callbackUrl: "/api/auth/signin" }) }}>
+              onClick={() => { signOut({ callbackUrl: "/auth/signin" }) }}>
               <LogOutIcon className="size-4 text-black" />
               LogOut
             </Button>
@@ -90,7 +92,7 @@ export default function DashboardUserButton() {
           Billing
           <CreditCard className=" size-4" />
         </DropdownMenuItem >
-        <DropdownMenuItem className="cursor-pointer flex items-center justify-between " onClick={() => signOut({ callbackUrl: "/api/auth/signin" })}>
+        <DropdownMenuItem className="cursor-pointer flex items-center justify-between " onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
           Logout
           <LogOutIcon className="size-4" />
         </DropdownMenuItem>
