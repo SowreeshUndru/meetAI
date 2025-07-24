@@ -1,25 +1,37 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaClient } from "@/generated/prisma";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import { z } from "zod";
-import bcrypt from "bcryptjs"
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@/generated/prisma"; // Adjust if needed
+import bcrypt from "bcryptjs";
 
+// ⛏️ Prisma instance
+const prisma = new PrismaClient();
+
+// ✅ Extend NextAuth types
 declare module "next-auth" {
   interface User {
     id: string;
+    userid?: string;
     email: string;
   }
+
   interface Session {
     user: User;
   }
 }
 
-const prisma = new PrismaClient();
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    userid?: string;
+    email?: string;
+  }
+}
 
-const handler = NextAuth({
+// ✅ Auth configuration
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -31,108 +43,88 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
     CredentialsProvider({
-
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
-        email: { label: "email", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" }
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
-
-      async authorize(credentials, req) {
-        if (!credentials||!credentials.password||!credentials.email) throw new Error("Invalid credentials");
-        const { email, password } = credentials;
-        if (!email || !password) throw new Error("Invalid credentials");
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing credentials");
+        }
 
         const user = await prisma.user.findUnique({
-          where: { email }
-         
+          where: { email: credentials.email },
         });
 
-        if (!user || !user.password || !user.email) throw new Error("User not found");
+        if (!user || !user.password) {
+          throw new Error("User not found or missing password");
+        }
 
-        console.log(user.password, password);
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) throw new Error("Invalid password");
-
+        const valid = await bcrypt.compare(credentials.password, user.password);
+        if (!valid) {
+          throw new Error("Invalid password");
+        }
 
         return {
           id: user.id,
-          email: user.email,
+          email: user.email!,
+          name: user.name ?? null,
+          image: user.image ?? null,
         };
-      }
-
-    })
+      },
+    }),
   ],
-
-
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: "/auth/signin",
-    // signOut: "/auth/signout",
   },
   callbacks: {
-     async signIn({ user, account }) {
+    async signIn({ user, account }) {
+      if (!user.email) return false;
+
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
         include: { accounts: true },
       });
-      if(account==null) return true;
-      // If user exists but is linked with a different provider — block sign in
-      if (existingUser) {
-        const isSameProvider = existingUser.accounts.some(
-          (acc) =>
-            acc.provider === account.provider &&
-            acc.providerAccountId === account.providerAccountId
-        );
 
-       
+      // ✅ No Account type from Prisma? Use plain object structure
+      if (existingUser && account) {
+        const isSameProvider = existingUser.accounts.some((acc: any) =>
+          acc.provider === account.provider &&
+          acc.providerAccountId === account.providerAccountId
+        );
+        // Optionally check provider mismatch
       }
 
-      return true; // Allow sign in
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
+        token.userid = user.id;
+        token.email = user.email ?? undefined;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
+      if (session.user && token) {
+        session.user.id = token.id!;
+        session.user.userid = token.userid!;
+        session.user.email = token.email!;
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      return `${process.env.NEXTAUTH_URL}`;
-
+    async redirect() {
+      return process.env.NEXTAUTH_URL!;
     },
   },
+};
 
-});
-
-export { handler as GET, handler as POST }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ✅ App Router support
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
