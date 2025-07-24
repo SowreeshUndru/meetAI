@@ -14,7 +14,9 @@ import { useRouter } from 'next/navigation';
 export default function DashboardUserButton() {
   const router=useRouter();
   const session = useSession();
- 
+  // console.log("sowreeshDebugcontinue");
+  // console.log("debug1:",session.data?.user.id);
+  // console.log("sowreeshDebugbreak");
   const isMobile = useIsMobile();
   if (isMobile) {
     return (
