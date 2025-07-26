@@ -6,17 +6,20 @@ import Loading from "@/compo/Loading";
 import Error from "@/compo/Error";
 import { ResponsiveDialog } from "@/compo/ResponsiveDialog";
 import { Button } from "@/components/ui/button";
+import { DataTable } from "../components/data-table";
+import { columns} from "../components/columns";
 
 export const AgentsView = () => {
+ 
     const trpc = useTRPC();
     const { data,error} = useSuspenseQuery(trpc.agents.getMany.queryOptions());
 
     if(error) throw error;
     
     return(
-        <div>
+        <div className="flex-1 pb-4 px-4 md:px-8 flex flex-col gap-y-4">
          
-          {JSON.stringify(data, null, 2)}
+          <DataTable data={data} columns={columns}  />
         </div>
     )
 }
