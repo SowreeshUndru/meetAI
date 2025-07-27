@@ -8,12 +8,19 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import ListHeader from "@/modules/agents/ui/components/ListHeader";
 import { getServerSession } from "next-auth";
-
-async function page() {
+import type { SearchParams } from "nuqs";
+import { loadSearchParams } from "@/modules/agents/params";
+interface props{
+  searchParams:Promise<SearchParams>;
+}
+async function page({searchParams}:props) {
+  const filters=await loadSearchParams(searchParams);
   const session= await getServerSession();
 
   const queryClient = getQueryClient();
-  void  queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+  void  queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({
+    ...filters,
+  }));
 
 console.log(session?.user.id)
 
