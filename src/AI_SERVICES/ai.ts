@@ -31,10 +31,7 @@ const model = genAI.getGenerativeModel({
   
 });
 
-/**
- * userPrompt: A natural question or instruction (e.g. "Who created the meeting?")
- * callData: JSON or stringified structured video call transcript
- */
+
 async function analyzeVideoCall(userPrompt:string, callData:any,createdUser:any,agent:any,instructions:any,createdAt:any) {
   const prompt = `
 USER QUESTION:

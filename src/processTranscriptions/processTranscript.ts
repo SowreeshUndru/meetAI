@@ -14,24 +14,24 @@ interface TranscriptLine {
 
 export default async function processTranscript(url: string|null|undefined) {
   try {
-    // Step 1: Fetch the JSONL file using axios
+  
     if(url===null||url===undefined) return null;
     const res = await axios.get(url, { responseType: "text" });
     const raw = res.data;
 
-    // Step 2: Parse JSONL into a JS array
+    
     const transcript: TranscriptLine[] = JSONL.parse(raw);
 
-    // Step 3: Collect unique speaker IDs
+ 
     const speakerIds = [...new Set(transcript.map((line) => line.speaker_id))];
 
-    // Step 4: Load speaker names from database
+   
     const users = await prisma.user.findMany({
       where: { id: { in: speakerIds } },
       select: { id: true, name: true,email:true },
     });
 
-    // Step 5: Replace speaker_id with speaker name
+
     const enriched = transcript.map((line) => {
       const user = users.find((u) => u.id === line.speaker_id);
       return {
@@ -40,7 +40,7 @@ export default async function processTranscript(url: string|null|undefined) {
       };
     });
 
-    // Step 6: Log or return the enriched data
+
     console.log(JSON.stringify(enriched, null, 2));
     return enriched;
 
@@ -51,4 +51,4 @@ export default async function processTranscript(url: string|null|undefined) {
   }
 }
 
-// Example usage
+
