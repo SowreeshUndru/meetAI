@@ -8,8 +8,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+interface props{
+  agentId:string|null,
+  agentName:string|null,
+  agentInstructions:string|null
+}
 
-export default function CreateRoom() {
+export default function CreateRoom({agentId,agentName,agentInstructions}:props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -38,8 +43,8 @@ export default function CreateRoom() {
       return;
     }
     
-    createRoomMutation.mutate({ customId: id }); 
- 
+    createRoomMutation.mutate({ customId: `${id}**${agentId}` }); 
+    
   };
 
   return (

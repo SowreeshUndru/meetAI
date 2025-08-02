@@ -14,36 +14,44 @@ export const roomRouter = createTRPCRouter({
   createRoom: protectedProcedure
     .input(z.object({ customId: z.string().min(4) }))
     .mutation(async ({ ctx, input }) => {
-
+      const [roomId, agentId] = input.customId.split("**");
+      console.log("agentID",agentId);
+      
+      input.customId=roomId;
         const call=streamVideo.video.call("default",input.customId)
         await call.create({
-          data:{
-            created_by :{
-              id:ctx.auth.user.id
+          data: {
+            created_by: { id: ctx.auth.user.id },
+            custom: {
+              meetingId: input.customId,
+              createdBy: ctx.auth.user.id,
             },
-            custom:{
-              meetingId:input.customId,
-            },
-            settings_override:{
-              transcription:{
-                language:"en",
-                mode:"auto-on",
-                closed_caption_mode:"auto-on"
-              },
-              recording:{
+            settings_override: {
+              transcription: {
+                language: "en",
                 mode: "auto-on",
-                quality:"1080p"
-              }
+                closed_caption_mode: "auto-on",
+              },
+              recording: {
+                mode: "auto-on", // optional; see below
+                quality: "1080p",
+              },
             }
           }
         });
-
-      return await prisma.room.create({
-        data: {
-          customId: input.customId,
-          createdById: ctx.auth.user.id,
-        }
-      });
+        
+        
+        //await call.startTranscription({ language: "en" });
+       
+        
+        const details= await prisma.room.create({
+          data: {
+            customId: input.customId,
+            createdById: ctx.auth.user.id,
+            agentId:agentId
+          }
+        });
+      return details;
     }),
 
   joinRoom: protectedProcedure

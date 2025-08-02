@@ -19,8 +19,8 @@ export const baseProcedure = t.procedure;
 export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   const session = ctx.session;
 
-  if (!session===null) {
-   redirect("/");
+  if (!session) {
+   redirect("/login");
   }
 
   return next({

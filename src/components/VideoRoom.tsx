@@ -26,7 +26,7 @@ import CreateRoom from './CreateRoom';
 import { Divide } from "lucide-react";
 import { CallUI } from "./Call-ui";
 
-export default function VideoRoom({ customId, userId ,userEmail}: { customId: string, userId: string ,userEmail:string}) {
+export default function VideoRoom({ creatorId,customId, userId ,userEmail}: { customId: string, userId: string ,userEmail:string,creatorId:string}) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   
@@ -66,9 +66,9 @@ console.log(token);
   useEffect(()=>{
     
     const _client=new StreamVideoClient({
-      apiKey:"mmhfdzb5evj2",
-      token:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0phbmdvX0ZldHQiLCJ1c2VyX2lkIjoiSmFuZ29fRmV0dCIsInZhbGlkaXR5X2luX3NlY29uZHMiOjYwNDgwMCwiaWF0IjoxNzUzNzg1ODA2LCJleHAiOjE3NTQzOTA2MDZ9.bg7PNJuwfx89tYywE48GmfUBkgn_P0wm_ySIshJ932Q" ,
-      user: { id: "Jango_Fett" ,
+      apiKey:"hqcmvyajp2g4",
+      token:token ,
+      user: { id: userId ,
         name:userEmail,
        
       },
@@ -79,6 +79,7 @@ console.log(token);
 
     return ()=>{
       _client.disconnectUser();
+      
       setClient(undefined);
     }
 
@@ -122,7 +123,7 @@ console.log(token);
       
         <StreamVideo client={client}>
           <StreamCall call={call}>
-           <CallUI customId={customId} />
+           <CallUI userId={userId} customId={customId} creatorId={creatorId} />
           </StreamCall>
         </StreamVideo>
       

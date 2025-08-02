@@ -19,7 +19,7 @@ import Link from "next/link";
 import { generateAvatarUri } from "@/lib/avatar";
 import { Button } from "./ui/button";
 
-
+ 
 import "@stream-io/video-react-sdk/dist/css/styles.css"
 
 interface props {
