@@ -66,7 +66,7 @@ console.log(token);
   useEffect(()=>{
     
     const _client=new StreamVideoClient({
-      apiKey:"hqcmvyajp2g4",
+      apiKey:process.env.NEXT_PUBLIC_STREAM_VIDEO_API_KEY!,
       token:token ,
       user: { id: userId ,
         name:userEmail,
